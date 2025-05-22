@@ -5,22 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>PDBe Molstar - Helper functions</title>
 
-
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <!-- Molstar CSS & JS -->
-    <link
-            rel="stylesheet"
-            type="text/css"
-            href="https://cdn.jsdelivr.net/npm/pdbe-molstar@3.2.0/build/pdbe-molstar-light.css"
-    />
-    <!--    <script-->
-    <!--            type="text/javascript"-->
-    <!--            src="https://cdn.jsdelivr.net/npm/pdbe-molstar@3.2.0/build/pdbe-molstar-plugin.js"-->
-    <!--    ></script>-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pdbe-molstar@3.2.0/build/pdbe-molstar-light.css"/>
     <script type="text/javascript" src="js/pdbe-molstar-plugin-3.2.4-alphalasso.js"></script>
 
     <style>
@@ -40,112 +33,102 @@
 </head>
 
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-11">
-            <!-- Molstar container -->
-            <div id="myViewer"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-11">
+                <!-- Molstar container -->
+                <div id="myViewer"></div>
+            </div>
         </div>
-
+        <div class="row">
+            <div class="col-11 text-center mb-4">
+                <button class="btn btn-primary btn-lg" onclick="toggleSurface(viewerInstance);">
+                    <i class="fas fa-layer-group mr-2"></i>Show/Hide Surface
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="row">
 
-        <button onclick="toggleSurface(viewerInstance);">
-            Loading state
-        </button>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
 
+    <script>
+        // Create plugin instance
+        const viewerInstance = new PDBeMolstarPlugin();
 
-    </div>
-</div>
+        // Set options
+        const options = {
+            skin: 'light',
+            customData: {
+                url: './pdb/AF-A0A067QHV7-F1-model_v4.pdb',
+                format: 'pdb',
+            },
+            alphafoldView: true,
+            bgColor: {r: 255, g: 255, b: 255},
+            hideCanvasControls: [
+                'selection',
+                'animation',
+                'controlToggle',
+                'controlInfo',
+            ],
+            sequencePanel: true,
+            landscape: true,
+        };
 
-<!--JScript-->
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-        crossorigin="anonymous"></script>
+        // Get element from HTML/Template to place the viewer
+        const viewerContainer = document.getElementById('myViewer');
 
-<script>
-    // Create plugin instance
-    const viewerInstance = new PDBeMolstarPlugin();
+        // Call render method to display the 3D view
+        viewerInstance.render(viewerContainer, options);
+    </script>
 
-    // Set options
-    const options = {
-        skin: 'light',
-        customData: {
-            url: './pdb/AF-A0A067QHV7-F1-model_v4.pdb',
-            format: 'pdb',
-            // binary: false,
-        },
-        alphafoldView: true,
-        bgColor: {r: 255, g: 255, b: 255},
-        hideCanvasControls: [
-            'selection',
-            'animation',
-            'controlToggle',
-            'controlInfo',
-        ],
-        sequencePanel: true,
-        landscape: true,
-    };
+    <script>
+        let surfaceFetched = false;
+        let triangles = null;
+        let bond_coords = null;
+        let surface = null;
+        let bond = null;
+        let showSurface = false;
 
-    // Get element from HTML/Template to place the viewer
-    const viewerContainer = document.getElementById('myViewer');
-
-    // Call render method to display the 3D view
-    viewerInstance.render(viewerContainer, options);
-</script>
-
-
-<script>
-    let surfaceFetched = false;
-    let triangles = null;
-    let bond_coords = null;
-    let surface = null;
-    let bond = null;
-    let showSurface = false;
-
-    function fetchJSONData() {
-        // function toggleSurface(instance) {
-        fetch('./surface/data.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                triangles = data.triangles;
-                bond_coords = data.bond;
-            })
-            .catch(error => console.error('Failed to fetch data:', error));
-    }
-
-    fetchJSONData();
-
-    function toggleSurface(instance) {
-        if (showSurface) {
-            //     currently surface is shown. remove it
-            surface.then(x => instance.deleteStructure(x));
-            bond.then(x => instance.deleteStructure(x));
-        } else {
-            const opacity = 0.9;
-            surface = instance.renderSurface(0, triangles, opacity);
-            bond = instance.renderBond(0, bond_coords[0], bond_coords[1]);
-
+        function fetchJSONData() {
+            fetch('./surface/data.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    triangles = data.triangles;
+                    bond_coords = data.bond;
+                })
+                .catch(error => console.error('Failed to fetch data:', error));
         }
 
-        showSurface = !showSurface;
-        // console.log(showSurface)
-    }
+        fetchJSONData();
 
-    toggleSurface
-</script>
+        function toggleSurface(instance) {
+            if (showSurface) {
+                // currently surface is shown. remove it
+                surface.then(x => instance.deleteStructure(x));
+                bond.then(x => instance.deleteStructure(x));
+            } else {
+                const opacity = 0.9;
+                surface = instance.renderSurface(0, triangles, opacity);
+                bond = instance.renderBond(0, bond_coords[0], bond_coords[1]);
+            }
+
+            showSurface = !showSurface;
+        }
+    </script>
 </body>
 </html>
